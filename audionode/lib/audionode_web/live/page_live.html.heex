@@ -1,0 +1,71 @@
+<form
+  phx-change="set-master-volume"
+  class="flex flex-col border rounded-lg pt-5 pb-6 px-5 border-stone-400"
+>
+  <label for="MasterVolume" class="text-xl pb-2 text-stone-800">Master volume</label>
+  <input
+    phx-throttle="10"
+    id="MasterVolume"
+    name="volume"
+    type="range"
+    min="0"
+    max="100"
+    value={100 * @master_volume}
+  />
+</form>
+
+<div class="w-full flex flex-row justify-around gap-8 my-8 relative">
+  <div class="border-b border-stone-400 h-[1px] absolute top-1/2 w-full left-0"></div>
+  <div class="z-0 bg-white relative px-5 font-medium text-lg text-stone-700 uppercase">
+    Connected streams <%= if Enum.count(@panel) > 0, do: "(#{Enum.count(@panel)})" %>
+  </div>
+</div>
+
+<%= if Enum.count(@panel) == 0 do %>
+  <div class="text-xl flex flex-row justify-around text-stone-500">
+    None, but they will show up here when you start streaming
+  </div>
+<% end %>
+
+<%= for {source, {volume, _right, left}} <- @panel do %>
+  <div class="flex flex-col border rounded-lg pt-5 pb-6 px-5 border-stone-400 mb-5 last:mb-0">
+    <div class="text-xl text-stone-800 mb-2"><%= source %></div>
+
+    <form
+      phx-change="change-panel-settings"
+      phx-value-source={source}
+      class="flex flex-row justify-between gap-6 "
+    >
+      <div class="w-full flex flex-row align-center">
+        <label for={"Volume" <> source} class="mr-3">
+          <.icon name="hero-speaker-wave" />
+        </label>
+
+        <input
+          phx-throttle="10"
+          id={"Volume" <> source}
+          class="w-full"
+          name="volume"
+          type="range"
+          min="0"
+          max="100"
+          value={round(100 * volume)}
+        />
+      </div>
+
+      <div class="w-full flex flex-row align-center">
+        <div class="text-xl font-medium text-stone-600 mr-4">L</div>
+        <input
+          phx-throttle="10"
+          name="balance"
+          class="w-full"
+          type="range"
+          min="0"
+          max="100"
+          value={round(100 * left)}
+        />
+        <div class="text-xl font-medium text-stone-600 ml-4">R</div>
+      </div>
+    </form>
+  </div>
+<% end %>
